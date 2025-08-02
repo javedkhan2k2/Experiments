@@ -12,6 +12,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<Device, DeviceDto>();
         CreateMap<DeviceDto, Device>();
         CreateMap<CreateDeviceDto, Device>();
+        CreateMap<DeviceStatusDto, Device>();
 
         // ClampingData mapping
         CreateMap<ClampingData, ClampingDataDto>();

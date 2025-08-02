@@ -3,7 +3,6 @@ using ClampingDevice.Common.Results;
 using ClampingDevice.Data;
 using ClampingDevice.DTOs;
 using ClampingDevice.Entities;
-using System.Net;
 
 namespace ClampingDevice.Services;
 
@@ -11,13 +10,13 @@ public class DeviceService(IDeviceRepository deviceRepository, ILogger<DeviceSer
 {
     public async Task<Result> DeleteAsync(string serialNumber)
     {
-        if(string.IsNullOrWhiteSpace(serialNumber)) return Result.Failure(new Error("DeleteDeviceError", "Serial number cannot be null or empty."));
+        if (string.IsNullOrWhiteSpace(serialNumber)) return Result.Failure(new Error("DeleteDeviceError", "Serial number cannot be null or empty."));
 
         return await TryExecuteAsync(async () =>
         {
-            var device = await deviceRepository.GetEntityBySerialNumberAsync(serialNumber);
+            var device = await deviceRepository.GetBySerialNumberAsync(serialNumber);
             if (device is null) return Result.Failure(new Error("DeviceNotFound", "Device with the specified serial number not found."));
-            
+
             deviceRepository.Delete(device);
             if (await deviceRepository.SaveChangesAsync())
                 return Result.Success();
@@ -39,16 +38,29 @@ public class DeviceService(IDeviceRepository deviceRepository, ILogger<DeviceSer
 
     public async Task<Result<DeviceDto>> GetBySerialNumberAsync(string serialNumber)
     {
-        if(string.IsNullOrWhiteSpace(serialNumber))
+        if (string.IsNullOrWhiteSpace(serialNumber))
             return Result.Failure<DeviceDto>(new Error("GetDeviceError", "Serial number cannot be null or empty."));
 
         return await TryExecuteAsync(async () =>
         {
-            var device = await deviceRepository.GetEntityBySerialNumberAsync(serialNumber);
+            var device = await deviceRepository.GetBySerialNumberAsync(serialNumber);
             if (device is null) return Result.Failure<DeviceDto>(new Error("DeviceNotFound", "Device with the specified serial number not found."));
 
             return Result.Success(mapper.Map<DeviceDto>(device));
         }, nameof(GetBySerialNumberAsync));
+    }
+
+    public async Task<Result<DeviceStatusDto>> GetStatusAsync(string serialNumber)
+    {
+        if (string.IsNullOrWhiteSpace(serialNumber)) return Result.Failure<DeviceStatusDto>(new Error("GetDeviceStatusError", "Serial number cannot be null or empty."));
+
+        return await TryExecuteAsync(async () =>
+        {
+            var device = await deviceRepository.GetBySerialNumberAsync(serialNumber);
+            if (device is null) return Result.Failure<DeviceStatusDto>(new Error("DeviceNotFound", "Device with the specified serial number not found."));
+
+            return Result.Success(mapper.Map<DeviceStatusDto>(device));
+        }, nameof(GetStatusAsync));
     }
 
     public async Task<Result<DeviceDto>> RegisterAsync(CreateDeviceDto deviceDto)
@@ -61,12 +73,12 @@ public class DeviceService(IDeviceRepository deviceRepository, ILogger<DeviceSer
         {
             // Check if the device already registered
             var existingDevice = await deviceRepository.GetBySerialNumberAsync(deviceDto.SerialNumber);
-            if(existingDevice is not null) return Result.Failure<DeviceDto>(new Error("DeviceAlreadyRegistered", "A device with this serial number is already registered."));
-            
+            if (existingDevice is not null) return Result.Failure<DeviceDto>(new Error("DeviceAlreadyRegistered", "A device with this serial number is already registered."));
+
             var device = mapper.Map<Device>(deviceDto);
             await deviceRepository.AddAsync(device);
 
-            if(await deviceRepository.SaveChangesAsync()) return Result.Success(mapper.Map<DeviceDto>(device));
+            if (await deviceRepository.SaveChangesAsync()) return Result.Success(mapper.Map<DeviceDto>(device));
 
             return Result.Failure<DeviceDto>(new Error("RegisterDeviceError", "Failed to register the device."));
         }, nameof(RegisterAsync));
@@ -74,14 +86,15 @@ public class DeviceService(IDeviceRepository deviceRepository, ILogger<DeviceSer
 
     public async Task<Result> ToggleActiveAsync(string serialNumber)
     {
-        if(string.IsNullOrWhiteSpace(serialNumber))
+        if (string.IsNullOrWhiteSpace(serialNumber))
             return Result.Failure(new Error("ToggleActiveError", "Serial number cannot be null or empty."));
 
         return await TryExecuteAsync(async () =>
         {
-            var device = await deviceRepository.GetEntityBySerialNumberAsync(serialNumber);
+            var device = await deviceRepository.GetBySerialNumberAsync(serialNumber);
             if (device is null) return Result.Failure(new Error("DeviceNotFound", "Device with the specified serial number not found."));
             device.IsActive = !device.IsActive; // Toggle the active status
+            device.LastUpdatedAt = DateTime.UtcNow; // Update the last updated timestamp
             deviceRepository.Update(device);
             if (await deviceRepository.SaveChangesAsync())
                 return Result.Success();
@@ -91,15 +104,16 @@ public class DeviceService(IDeviceRepository deviceRepository, ILogger<DeviceSer
 
     public async Task<Result> UpdateAsync(string serialNumber, UpdateDeviceDto dto)
     {
-        if(string.IsNullOrWhiteSpace(serialNumber)) return Result.Failure(new Error("UpdateDeviceError", "Serial number cannot be null or empty."));
-        if(dto is null) return Result.Failure(new Error("UpdateDeviceError", "Update DTO cannot be null."));
+        if (string.IsNullOrWhiteSpace(serialNumber)) return Result.Failure(new Error("UpdateDeviceError", "Serial number cannot be null or empty."));
+        if (dto is null) return Result.Failure(new Error("UpdateDeviceError", "Update DTO cannot be null."));
 
         return await TryExecuteAsync(async () =>
         {
-            var device = await deviceRepository.GetEntityBySerialNumberAsync(serialNumber);
+            var device = await deviceRepository.GetBySerialNumberAsync(serialNumber);
             if (device is null) return Result.Failure(new Error("DeviceNotFound", "Device with the specified serial number not found."));
             // Update the device properties
             mapper.Map(dto, device);
+            device.LastUpdatedAt = DateTime.UtcNow; // Update the last updated timestamp
             deviceRepository.Update(device);
             if (await deviceRepository.SaveChangesAsync())
                 return Result.Success();

@@ -20,7 +20,7 @@ namespace ClampingDevice.Controllers
         [HttpPost]
         public async Task<ActionResult> Clamp(ClampingDataDto dto)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }

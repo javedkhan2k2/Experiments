@@ -15,5 +15,9 @@ public class Device
     public string Location { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;
 
+    [Required]
+    public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
+    public DateTime? LastUpdatedAt { get; set; }
+
     public List<ClampingData> ClampingRecords { get; set; } = new();
 }

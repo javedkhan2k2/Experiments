@@ -1,7 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+﻿using ClampingDevice.Common.Results;
+using Microsoft.EntityFrameworkCore;
 using System.Net;
-using ClampingDevice.Common.Results;
 
 namespace ClampingDevice.Services;
 
@@ -91,6 +90,6 @@ public abstract class BaseService(ILogger logger)
         };
     }
 
-    
-    
+
+
 }

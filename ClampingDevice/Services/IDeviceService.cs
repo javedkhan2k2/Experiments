@@ -11,4 +11,5 @@ public interface IDeviceService
     Task<Result> UpdateAsync(string serialNumber, UpdateDeviceDto dto);
     Task<Result> DeleteAsync(string serialNumber);
     Task<Result> ToggleActiveAsync(string serialNumber);
+    Task<Result<DeviceStatusDto>> GetStatusAsync(string serialNumber);
 }

@@ -1,5 +1,4 @@
-﻿using AutoMapper.QueryableExtensions;
-using ClampingDevice.DTOs;
+﻿using ClampingDevice.DTOs;
 using ClampingDevice.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,16 +14,10 @@ public class DeviceRepository(AppDbContext dbContext) : IDeviceRepository
 
     public async Task<Device?> GetByIdAsync(int deviceId) => await dbContext.Devices.FindAsync(deviceId);
 
-    public async Task<DeviceDto?> GetBySerialNumberAsync(string serialNumber)
+    public async Task<Device?> GetBySerialNumberAsync(string serialNumber)
     {
         return await dbContext.Devices
             .Where(d => d.SerialNumber == serialNumber)
-            .Select(d => new DeviceDto
-            {
-                SerialNumber = d.SerialNumber,
-                Model = d.Model,
-                Location = d.Location
-            })
             .FirstOrDefaultAsync();
     }
 
@@ -32,6 +25,5 @@ public class DeviceRepository(AppDbContext dbContext) : IDeviceRepository
 
     public async Task<bool> SaveChangesAsync() => await dbContext.SaveChangesAsync() > 0;
 
-    public async Task<Device?> GetEntityBySerialNumberAsync(string serialNumber) => await dbContext.Devices.FirstOrDefaultAsync(d => d.SerialNumber == serialNumber);
 
 }

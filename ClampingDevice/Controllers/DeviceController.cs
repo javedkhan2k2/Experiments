@@ -34,13 +34,15 @@ public class DeviceController(IDeviceService deviceService) : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(serialNumber)) return BadRequest("Serial number cannot be null or empty.");
 
-        throw new NotImplementedException("This method is not implemented yet.");
+        var result = await deviceService.GetStatusAsync(serialNumber);
+        if (result.IsFailure) return NotFound(result.Error);
+        return Ok(result.Value);
     }
 
     [HttpPut("{serialNumber}")]
-    public async Task<IActionResult> UpdateAsync(string serialNumber, UpdateDeviceDto dto)
+    public async Task<IActionResult> UpdateAsync(string serialNumber, [FromBody] UpdateDeviceDto dto)
     {
-        if(string.IsNullOrWhiteSpace(serialNumber)) return BadRequest("Serial number cannot be null or empty.");
+        if (string.IsNullOrWhiteSpace(serialNumber)) return BadRequest("Serial number cannot be null or empty.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var result = await deviceService.UpdateAsync(serialNumber, dto);
@@ -51,7 +53,7 @@ public class DeviceController(IDeviceService deviceService) : ControllerBase
     [HttpDelete("{serialNumber}")]
     public async Task<IActionResult> DeleteAsync(string serialNumber)
     {
-        if(string.IsNullOrWhiteSpace(serialNumber)) return BadRequest("Serial number cannot be null or empty.");
+        if (string.IsNullOrWhiteSpace(serialNumber)) return BadRequest("Serial number cannot be null or empty.");
 
         var result = await deviceService.DeleteAsync(serialNumber);
         if (result.IsFailure) return BadRequest(result.Error);
@@ -61,7 +63,7 @@ public class DeviceController(IDeviceService deviceService) : ControllerBase
     [HttpPatch("{serialNumber}/toggle-active")]
     public async Task<IActionResult> ToggleActiveAsync(string serialNumber)
     {
-        if(string.IsNullOrWhiteSpace(serialNumber)) return BadRequest("Serial number cannot be null or empty.");
+        if (string.IsNullOrWhiteSpace(serialNumber)) return BadRequest("Serial number cannot be null or empty.");
 
         var result = await deviceService.ToggleActiveAsync(serialNumber);
         if (result.IsFailure) return BadRequest(result.Error);
@@ -69,9 +71,9 @@ public class DeviceController(IDeviceService deviceService) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<DeviceDto>> RegisterDeviceAsync(CreateDeviceDto dto)
+    public async Task<ActionResult<DeviceDto>> RegisterDeviceAsync([FromBody] CreateDeviceDto dto)
     {
-        if(!ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
@@ -79,7 +81,7 @@ public class DeviceController(IDeviceService deviceService) : ControllerBase
         var result = await deviceService.RegisterAsync(dto);
         if (result.IsFailure) return BadRequest(result.Error);
 
-        return Ok(result.Value);
+        return CreatedAtAction(nameof(GetDeviceBySerialNumberAsync), new {serialNumber = result.Value.SerialNumber}, result.Value);
     }
 
 
