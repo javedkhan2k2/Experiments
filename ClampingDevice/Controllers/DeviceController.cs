@@ -1,4 +1,5 @@
-﻿using ClampingDevice.DTOs;
+﻿using ClampingDevice.Common.Results;
+using ClampingDevice.DTOs;
 using ClampingDevice.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,6 +11,8 @@ public class DeviceController(IDeviceService deviceService) : ControllerBase
 {
     // region for all get methods
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<DeviceDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<IEnumerable<DeviceDto>>> GetAllDevicesAsync()
     {
         var result = await deviceService.GetAllAsync();
@@ -19,6 +22,9 @@ public class DeviceController(IDeviceService deviceService) : ControllerBase
     }
 
     [HttpGet("{serialNumber}")]
+    [ProducesResponseType(typeof(DeviceDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<DeviceDto>> GetDeviceBySerialNumberAsync(string serialNumber)
     {
         if (string.IsNullOrWhiteSpace(serialNumber)) return BadRequest("Serial number cannot be null or empty.");
@@ -30,7 +36,10 @@ public class DeviceController(IDeviceService deviceService) : ControllerBase
     }
 
     [HttpGet("{serialNumber}/status")]
-    public async Task<ActionResult<DeviceDto>> GetDeviceStatusAsync(string serialNumber)
+    [ProducesResponseType(typeof(DeviceStatusDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<DeviceStatusDto>> GetDeviceStatusAsync(string serialNumber)
     {
         if (string.IsNullOrWhiteSpace(serialNumber)) return BadRequest("Serial number cannot be null or empty.");
 
@@ -40,6 +49,10 @@ public class DeviceController(IDeviceService deviceService) : ControllerBase
     }
 
     [HttpPut("{serialNumber}")]
+    [ProducesResponseType(typeof(NoContentResult), StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateAsync(string serialNumber, [FromBody] UpdateDeviceDto dto)
     {
         if (string.IsNullOrWhiteSpace(serialNumber)) return BadRequest("Serial number cannot be null or empty.");
@@ -51,6 +64,9 @@ public class DeviceController(IDeviceService deviceService) : ControllerBase
     }
 
     [HttpDelete("{serialNumber}")]
+    [ProducesResponseType(typeof(NoContentResult), StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteAsync(string serialNumber)
     {
         if (string.IsNullOrWhiteSpace(serialNumber)) return BadRequest("Serial number cannot be null or empty.");
@@ -61,6 +77,9 @@ public class DeviceController(IDeviceService deviceService) : ControllerBase
     }
 
     [HttpPatch("{serialNumber}/toggle-active")]
+    [ProducesResponseType(typeof(NoContentResult), StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ToggleActiveAsync(string serialNumber)
     {
         if (string.IsNullOrWhiteSpace(serialNumber)) return BadRequest("Serial number cannot be null or empty.");
@@ -71,6 +90,9 @@ public class DeviceController(IDeviceService deviceService) : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType(typeof(DeviceDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<DeviceDto>> RegisterDeviceAsync([FromBody] CreateDeviceDto dto)
     {
         if (!ModelState.IsValid)
@@ -79,12 +101,9 @@ public class DeviceController(IDeviceService deviceService) : ControllerBase
         }
 
         var result = await deviceService.RegisterAsync(dto);
-        if (result.IsFailure) return BadRequest(result.Error);
+        if (result.IsFailure || result.Value is null) return BadRequest(result.Error);
 
         return CreatedAtAction(nameof(GetDeviceBySerialNumberAsync), new {serialNumber = result.Value.SerialNumber}, result.Value);
     }
-
-
-
 
 }
