@@ -12,15 +12,16 @@ public static class ApplicationServiceExtensions
            opt.UseSqlite("Data Source=clamps.db")
         );
         services.AddControllers();
-        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         services.AddOpenApi();
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
         // Register Repositories and Services
         services.AddScoped<IDeviceRepository, DeviceRepository>();
         services.AddScoped<IClampingDataRepository, ClampingDataRepository>();
+        services.AddScoped<IEventLogRepository, EventLogRepository>();
         services.AddScoped<IDeviceService, DeviceService>();
         services.AddScoped<IClampingDataService, ClampingDataService>();
+        services.AddScoped<IEventLogService, EventLogService>();
 
         return services;
     }

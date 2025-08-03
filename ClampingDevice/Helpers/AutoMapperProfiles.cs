@@ -16,5 +16,12 @@ public class AutoMapperProfiles : Profile
 
         // ClampingData mapping
         CreateMap<ClampingData, ClampingDataDto>();
+        CreateMap<ClampingDataDto, ClampingData>();
+        CreateMap<CreateClampingDataDto, ClampingData>();
+
+        // EventLog mapping
+        CreateMap<EventLog, EventLogDto>();
+        CreateMap<EventLogDto, EventLog>();
+        CreateMap<CreateEventLogDto, EventLog>();
     }
 }
