@@ -19,7 +19,7 @@ public class EventLogController(IEventLogService eventLogService) : ControllerBa
         return Ok(result.Value);
     }
 
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:int}", Name = "GetByIdAsync")]
     [ProducesResponseType(typeof(EventLogDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
@@ -48,6 +48,6 @@ public class EventLogController(IEventLogService eventLogService) : ControllerBa
         if (result.IsFailure) return BadRequest(result.Error);
         
         var value = result.Value!;
-        return CreatedAtAction(nameof(GetByIdAsync), new { id = value.Id }, value);
+        return CreatedAtRoute("GetByIdAsync", new { id = value.Id}, value);
     }
 }

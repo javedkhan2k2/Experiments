@@ -14,6 +14,15 @@ public static class ApplicationServiceExtensions
         services.AddControllers();
         services.AddOpenApi();
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowVueDevClient", policy =>
+            {
+                policy.WithOrigins("http://localhost:5173", "https://localhost:5173") // or whatever Vite uses
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
+            });
+        });
 
         // Register Repositories and Services
         services.AddScoped<IDeviceRepository, DeviceRepository>();

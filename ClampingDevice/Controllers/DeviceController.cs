@@ -21,7 +21,7 @@ public class DeviceController(IDeviceService deviceService) : ControllerBase
         return Ok(result.Value);
     }
 
-    [HttpGet("{serialNumber}")]
+    [HttpGet("{serialNumber}", Name = "GetDeviceBySerialNumberAsync")]
     [ProducesResponseType(typeof(DeviceDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<DeviceDto>> GetDeviceBySerialNumberAsync(string serialNumber)
@@ -98,7 +98,7 @@ public class DeviceController(IDeviceService deviceService) : ControllerBase
         var result = await deviceService.RegisterAsync(dto);
         if (result.IsFailure || result.Value is null) return BadRequest(result.Error);
 
-        return CreatedAtAction(nameof(GetDeviceBySerialNumberAsync), new { serialNumber = result.Value.SerialNumber }, result.Value);
+        return CreatedAtRoute("GetDeviceBySerialNumberAsync", new { serialNumber = result.Value.SerialNumber }, result.Value);
     }
 
 }
