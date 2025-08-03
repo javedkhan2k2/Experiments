@@ -14,13 +14,13 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-//app.UseCors(x => x
-//    .AllowAnyHeader()
-//    .AllowAnyMethod()
-//    .AllowCredentials()
-//    .WithOrigins("http://localhost:5173", "https://localhost:5173")
-//    );
-app.UseCors("AllowVueDevClient");
+app.UseCors(x => x
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowCredentials()
+    .WithOrigins("http://localhost:4200", "https://localhost:4200")
+    );
+//app.UseCors("AllowVueDevClient");
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

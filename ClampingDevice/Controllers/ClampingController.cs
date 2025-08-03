@@ -19,11 +19,11 @@ namespace ClampingDevice.Controllers
             return Ok(result.Value);
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}", Name = "GetClampingDataByIdAsync")]
         [ProducesResponseType(typeof(ClampingDataDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ClampingDataDto>> GetByIdAsync(int id)
+        public async Task<ActionResult<ClampingDataDto>> GetClampingDataByIdAsync(int id)
         {
             if(id < 1) return BadRequest(new Error("InvalidId", "The provided ID is invalid."));
 
@@ -49,7 +49,7 @@ namespace ClampingDevice.Controllers
             if (result.IsFailure) return BadRequest(result.Error);
             
             var value = result.Value!;
-            return CreatedAtAction(nameof(GetByIdAsync), new {id = value.Id}, value);
+            return CreatedAtRoute("GetClampingDataByIdAsync", new {id = value.Id}, value);
         }
 
         [HttpDelete("{id:int}")]
