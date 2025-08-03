@@ -10,8 +10,15 @@ public class Result<T> : Result
         Value = value;
     }
 
-    public static Result<T> Success(T value) =>
-        new(value, true, Error.None);
+    //public static Result<T> Success(T value) =>
+    //    new(value, true, Error.None);
+
+    public static Result<T> Success(T value)
+    {
+        if (value is null)
+            throw new ArgumentNullException(nameof(value), "Success value cannot be null.");
+        return new(value, true, Error.None);
+    }
 
     public static new Result<T> Failure(Error error) =>
         new(default, false, error);

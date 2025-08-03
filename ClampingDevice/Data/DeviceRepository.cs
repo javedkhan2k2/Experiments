@@ -1,5 +1,4 @@
-﻿using ClampingDevice.DTOs;
-using ClampingDevice.Entities;
+﻿using ClampingDevice.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ClampingDevice.Data;

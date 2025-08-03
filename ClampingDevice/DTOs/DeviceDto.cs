@@ -1,7 +1,4 @@
-﻿using ClampingDevice.Entities;
-using System.ComponentModel.DataAnnotations;
-
-namespace ClampingDevice.DTOs;
+﻿namespace ClampingDevice.DTOs;
 
 public class DeviceDto
 {

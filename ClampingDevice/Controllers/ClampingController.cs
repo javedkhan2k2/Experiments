@@ -1,56 +1,79 @@
-﻿using ClampingDevice.Data;
+﻿using ClampingDevice.Common.Results;
 using ClampingDevice.DTOs;
-using ClampingDevice.Entities;
+using ClampingDevice.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace ClampingDevice.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ClampingController(AppDbContext dbContext) : ControllerBase
+    public class ClampingController(IClampingDataService clampingDataService) : ControllerBase
     {
         [HttpGet]
-        public async Task<ActionResult<List<ClampingDataDto>>> GetAllData()
+        [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(IEnumerable<ClampingDataDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<ClampingDataDto>>> GetAllAsync()
         {
-            // Simulate fetching data from a database
-            return Ok(await dbContext.ClampingsData.ToListAsync());
+            var result = await clampingDataService.GetAllAsync();
+            if(result.IsFailure) return BadRequest(result.Error);
+            return Ok(result.Value);
+        }
+
+        [HttpGet("{id:int}")]
+        [ProducesResponseType(typeof(ClampingDataDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ClampingDataDto>> GetByIdAsync(int id)
+        {
+            if(id < 1) return BadRequest(new Error("InvalidId", "The provided ID is invalid."));
+
+            var result = await clampingDataService.GetByIdAsync(id);
+            if (result.IsFailure)
+            {
+                if (result.Error.Code == "NotFound")
+                    return NotFound(result.Error);
+                return BadRequest(result.Error);
+            }
+            return Ok(result.Value);
         }
 
         [HttpPost]
-        public async Task<ActionResult> Clamp(ClampingDataDto dto)
+        [ProducesResponseType(typeof(ClampingDataDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<ClampingDataDto>> CreateAsync(CreateClampingDataDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            try
-            {
-                // Simulate adding clamping data to a database
-                await AddClampingDataToDatabase(dto);
-                return Ok(new { message = "Clamping data added successfully." });
-            }
-            catch (Exception ex)
-            {
-                // Log the exception (not implemented here)
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred while processing your request.", error = ex.Message });
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var result = await clampingDataService.CreateAsync(dto);
+            if (result.IsFailure) return BadRequest(result.Error);
+            
+            var value = result.Value!;
+            return CreatedAtAction(nameof(GetByIdAsync), new {id = value.Id}, value);
         }
 
-        private async Task AddClampingDataToDatabase(ClampingDataDto dto)
+        [HttpDelete("{id:int}")]
+        [ProducesResponseType(typeof(NoContentResult), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> DeleteAsync(int id)
         {
-            // Simulate adding data to a database
-            // In a real application, this would involve database operations
-            Console.WriteLine($"Clamping Data Added: Id={dto.DeviceId}, Force={dto.ClampingForceN}, Temperature={dto.TemperatureC}, Timestamp={dto.Timestamp}");
-            dto.Timestamp = DateTime.UtcNow; // Set the timestamp to the current time
-            dbContext.ClampingsData.Add(new ClampingData
-            {
-                DeviceId = dto.DeviceId,
-                ClampingForceN = dto.ClampingForceN,
-                TemperatureC = dto.TemperatureC,
-                Timestamp = dto.Timestamp
-            });
-            await dbContext.SaveChangesAsync();
+            if (id < 1) return BadRequest(new Error("InvalidId", "The provided ID is invalid."));
+            var result = await clampingDataService.DeleteAsync(id);
+            if (result.IsFailure) return BadRequest(result.Error);
+            return NoContent();
         }
+
+        [HttpGet("device/{serialNumber}")]
+        [ProducesResponseType(typeof(IEnumerable<ClampingDataDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<IEnumerable<ClampingDataDto>>> GetByDeviceSerialAsync(string serialNumber)
+        {
+            if (string.IsNullOrWhiteSpace(serialNumber)) return BadRequest(new Error("InvalidSerialNumber", "The provided serial number is invalid."));
+
+            var result = await clampingDataService.GetByDeviceSerialAsync(serialNumber);
+            if (result.IsFailure) return BadRequest(result.Error);
+            return Ok(result.Value);
+        }
+
     }
 }

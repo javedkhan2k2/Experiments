@@ -2,15 +2,13 @@
 
 namespace ClampingDevice.DTOs;
 
-public class ClampingDataDto
+public class CreateClampingDataDto
 {
     [Required]
-    public int Id { get; set; } 
-    [Required]
-    public int DeviceId { get; set; }
+    public string serialNumber{ get; set; } = string.Empty;
     [Required]
     public double ClampingForceN { get; set; }
     [Required]
     public double TemperatureC { get; set; }
-    public DateTime Timestamp { get; set; }
+
 }

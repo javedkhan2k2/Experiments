@@ -18,7 +18,9 @@ public static class ApplicationServiceExtensions
 
         // Register Repositories and Services
         services.AddScoped<IDeviceRepository, DeviceRepository>();
+        services.AddScoped<IClampingDataRepository, ClampingDataRepository>();
         services.AddScoped<IDeviceService, DeviceService>();
+        services.AddScoped<IClampingDataService, ClampingDataService>();
 
         return services;
     }
