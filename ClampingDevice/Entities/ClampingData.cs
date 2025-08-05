@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ClampingDevice.Data;
+using System.ComponentModel.DataAnnotations;
 
 namespace ClampingDevice.Entities;
 
@@ -12,6 +13,7 @@ public class ClampingData
     public double ClampingForceN { get; set; }
     [Required]
     public double TemperatureC { get; set; }
+    public ClampingActionType ActionType { get; set; }
     [Required]
     public DateTime Timestamp { get; set; }
     public bool IsValid { get; set; } = true;

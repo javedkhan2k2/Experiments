@@ -1,4 +1,5 @@
-﻿using ClampingDevice.Entities;
+﻿using ClampingDevice.DTOs;
+using ClampingDevice.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ClampingDevice.Data;
@@ -39,4 +40,52 @@ public class ClampingDataRepository(AppDbContext dbContext) : IClampingDataRepos
 
     public async Task<bool> SaveChangesAsync() => await dbContext.SaveChangesAsync() > 0;
 
+    public async Task<ClampingStatsDto> GetClampingStatsAsync()
+    {
+        var clampings = dbContext.ClampingsData.AsNoTracking();
+
+        var totalClampings = await clampings.CountAsync(c => c.ActionType == ClampingActionType.Clamp);
+        var totalUnclampings = await clampings.CountAsync(c => c.ActionType == ClampingActionType.Unclamp);
+
+        var failedClampings = await clampings.CountAsync(c => c.ActionType == ClampingActionType.Clamp && !c.IsValid);
+
+        var recentClampingTimestamp = await clampings
+            .Where(c => c.ActionType == ClampingActionType.Clamp)
+            .OrderByDescending(c => c.Timestamp)
+            .Select(c => (DateTime?)c.Timestamp)
+            .FirstOrDefaultAsync();
+
+        var recentUnclampingTimestamp = await clampings
+            .Where(c => c.ActionType == ClampingActionType.Unclamp)
+            .OrderByDescending(c => c.Timestamp)
+            .Select(c => (DateTime?)c.Timestamp)
+            .FirstOrDefaultAsync();
+
+        var devicesInvolved = await clampings
+            .Select(c => c.DeviceId)
+            .Distinct()
+            .CountAsync();
+
+        return new ClampingStatsDto
+        {
+            TotalClampings = totalClampings,
+            TotalUnclampings = totalUnclampings,
+            FailedClampings = failedClampings,
+            RecentClampingTimestamp = recentClampingTimestamp,
+            RecentUnclampingTimestamp = recentUnclampingTimestamp,
+            DevicesInvolved = devicesInvolved
+        };
+    }
+
+    public async Task<int> GetFailedClampingsLast24hAsync()
+    {
+        // TODO Add a DTO in future to return more detailed stats
+        var since = DateTime.UtcNow.AddHours(-24);
+
+        return await dbContext.ClampingsData
+        .AsNoTracking()
+        .CountAsync(c => c.ActionType == ClampingActionType.Clamp
+                      && !c.IsValid
+                      && c.Timestamp >= since);
+    }
 }

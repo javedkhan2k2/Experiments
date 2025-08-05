@@ -1,0 +1,66 @@
+@if(deviceService.paginatedResult()?.items?.length){
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <strong
+      >Aktuelle Geräte
+      <span class="text-primary"
+        >({{ deviceService.paginatedResult()?.items?.length }})</span
+      ></strong
+    >
+    <a routerLink="/" class="btn btn-sm btn-primary">Zurück</a>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-sm mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Serie</th>
+          <th>Modell</th>
+          <th>Standort</th>
+          <th>Status</th>
+          <th>Aktualisiert</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (device of deviceService.paginatedResult()?.items; track
+        device.id;) {
+        <tr>
+          <td>{{ device.serialNumber }}</td>
+          <td>{{ device.model }}</td>
+          <td>{{ device.location }}</td>
+          <td>
+            <span
+              class="badge"
+              [ngClass]="device.isActive ? 'bg-success' : 'bg-secondary'"
+            >
+              {{ device.isActive ? "Active" : "Inactive" }}
+            </span>
+          </td>
+          <td>{{ device.lastUpdatedAt | date : "short" }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (deviceService.paginatedResult()?.pagination) {
+  <div class="d-flex justify-content-center mt-4">
+    <pagination
+      [boundaryLinks]="true"
+      [totalItems]="(deviceService.paginatedResult()?.pagination)!.totalItems"
+      [itemsPerPage]="
+        (deviceService.paginatedResult()?.pagination)!.itemsPerPage
+      "
+      (pageChanged)="pageChanged($event)"
+      [(ngModel)]="(deviceService.paginatedResult()?.pagination)!.currentPage"
+      [maxSize]="10"
+      previousText="&lsaquo;"
+      nextText="&rsaquo;"
+      firstText="&laquo;"
+      lastText="&raquo;"
+      class="pagination-sm"
+    >
+    </pagination>
+  </div>
+  }
+  <!-- </div> -->
+</div>
+}

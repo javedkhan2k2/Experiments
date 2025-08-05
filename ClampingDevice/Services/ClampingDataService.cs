@@ -3,15 +3,56 @@ using ClampingDevice.Common.Results;
 using ClampingDevice.Data;
 using ClampingDevice.DTOs;
 using ClampingDevice.Entities;
+using ClampingDevice.SignalR;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ClampingDevice.Services;
 
-public class ClampingDataService(IClampingDataRepository clampingDataRepository, IDeviceRepository deviceRepository, IMapper mapper, ILogger<ClampingDataService> logger) : BaseService(logger), IClampingDataService
+public class ClampingDataService(IClampingDataRepository clampingDataRepository, IDeviceRepository deviceRepository, IHubContext<ClampingHub> hubContext, IMapper mapper, ILogger<ClampingDataService> logger) : BaseService(logger), IClampingDataService
 {
+    public async Task<Result> AddFakeClampingAsync()
+    {
+        return await TryExecuteAsync(async () =>
+        {
+            // Get a random device
+            var device = await deviceRepository.GetRandomDeviceAsync();
+            if (device == null || device.Id == 0)
+                return Result.Failure(new Error("DeviceError", "No active devices available for clamping"));
+            var deviceDto = mapper.Map<DeviceDto>(device);
+            var entity = new ClampingData
+            {
+                DeviceId = device.Id,
+                ClampingForceN = Random.Shared.Next(400, 1800), // Random clamping force between 500 and 1500 N
+                TemperatureC = Random.Shared.Next(0, 80), // Random temperature between 10 and 60 C
+                Timestamp = DateTime.UtcNow,
+            };
+            entity.ActionType = Random.Shared.Next(0, 2) == 0
+                ? ClampingActionType.Clamp
+                : ClampingActionType.Unclamp;
+            var warnings = new List<string>();
+            if (entity.ClampingForceN < 500 || entity.ClampingForceN > 1500)
+                warnings.Add($"Clamping force {entity.ClampingForceN}N is out of range.");
+            if (entity.TemperatureC < 10 || entity.TemperatureC > 60)
+                warnings.Add($"Temperature {entity.TemperatureC}C is out of range.");
+            entity.IsValid = !warnings.Any();
+            entity.WarningMessage = string.Join(" | ", warnings);
+            await clampingDataRepository.AddAsync(entity);
+            if (await clampingDataRepository.SaveChangesAsync())
+            {
+                var dto = mapper.Map<ClampingDataDto>(entity);
+                dto.Device = deviceDto; // Set the device DTO
+                await hubContext.Clients.All.SendAsync("ReceiveClamping", dto);
+                return Result.Success();
+            }
+
+            return Result.Failure(new Error("SaveError", "Failed to save the clamping data"));
+        }, nameof(AddFakeClampingAsync));
+    }
+
     public async Task<Result<ClampingDataDto>> CreateAsync(CreateClampingDataDto dto)
     {
         if (dto is null) return Result.Failure<ClampingDataDto>(new Error("ClampingDataServiceCreateError", "The dto cannot be null"));
-        if( string.IsNullOrWhiteSpace(dto.serialNumber))
+        if (string.IsNullOrWhiteSpace(dto.serialNumber))
             return Result.Failure<ClampingDataDto>(new Error("ClampingDataServiceCreateError", "The serial number cannot be null or empty"));
 
         return await TryExecuteAsync(async () =>
@@ -23,7 +64,7 @@ public class ClampingDataService(IClampingDataRepository clampingDataRepository,
             var warnings = new List<string>();
             if (dto.ClampingForceN < 500 || dto.ClampingForceN > 1500)
                 warnings.Add($"Clamping force {dto.ClampingForceN}N is out of range.");
-            if (dto.TemperatureC < 10 || dto.TemperatureC > 60) 
+            if (dto.TemperatureC < 10 || dto.TemperatureC > 60)
                 warnings.Add($"Temperature {dto.TemperatureC}C is out of range.");
 
             // Map DTO to entity
@@ -42,7 +83,7 @@ public class ClampingDataService(IClampingDataRepository clampingDataRepository,
 
     public async Task<Result> DeleteAsync(int id)
     {
-        if(id < 1) return Result.Failure(new Error("ClampingDataServiceDeleteError", "The id cannot be less than 1"));
+        if (id < 1) return Result.Failure(new Error("ClampingDataServiceDeleteError", "The id cannot be less than 1"));
         return await TryExecuteAsync(async () =>
         {
             var entity = await clampingDataRepository.GetByIdAsync(id);
@@ -68,7 +109,7 @@ public class ClampingDataService(IClampingDataRepository clampingDataRepository,
 
     public async Task<Result<IEnumerable<ClampingDataDto>>> GetByDeviceSerialAsync(string serialNumber)
     {
-        if(string.IsNullOrWhiteSpace(serialNumber)) return Result.Failure<IEnumerable<ClampingDataDto>>(new Error("ClampingDataServiceGetByDeviceSerialError", "The serial number cannot be null or empty"));
+        if (string.IsNullOrWhiteSpace(serialNumber)) return Result.Failure<IEnumerable<ClampingDataDto>>(new Error("ClampingDataServiceGetByDeviceSerialError", "The serial number cannot be null or empty"));
 
         return await TryExecuteAsync(async () =>
         {
@@ -83,12 +124,30 @@ public class ClampingDataService(IClampingDataRepository clampingDataRepository,
 
     public async Task<Result<ClampingDataDto>> GetByIdAsync(int id)
     {
-        if(id < 1) return Result.Failure<ClampingDataDto>(new Error("ClampingDataServiceGetByIdError", "The id cannot be less than 1"));
+        if (id < 1) return Result.Failure<ClampingDataDto>(new Error("ClampingDataServiceGetByIdError", "The id cannot be less than 1"));
         return await TryExecuteAsync(async () =>
         {
             var entity = await clampingDataRepository.GetByIdAsync(id);
             if (entity is null) return Result.Failure<ClampingDataDto>(new Error("NotFound", "The specified clamping data does not exist"));
             return Result.Success(mapper.Map<ClampingDataDto>(entity));
         }, nameof(GetByIdAsync));
+    }
+
+    public async Task<Result<int>> GetFailedClampingsLast24hAsync()
+    {
+        return await TryExecuteAsync(async () =>
+        {
+            var count = await clampingDataRepository.GetFailedClampingsLast24hAsync();
+            return Result.Success(count);
+        }, nameof(GetFailedClampingsLast24hAsync));
+    }
+
+    public async Task<Result<ClampingStatsDto>> GetStatsAsync()
+    {
+        return await TryExecuteAsync(async () =>
+        {
+            var stats = await clampingDataRepository.GetClampingStatsAsync();
+            return Result.Success(stats);
+        }, nameof(GetStatsAsync));
     }
 }

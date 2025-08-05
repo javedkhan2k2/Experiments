@@ -1,0 +1,34 @@
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-secondary text-white">
+    <h5 class="mb-0">Systemstatus</h5>
+  </div>
+  <div class="card-body">
+    <div class="row align-items-center mb-2">
+      <div class="col-6">API-Konnektivität:</div>
+      <div class="col-6 text-end">
+        <span class="badge bg-success">Online</span>
+      </div>
+    </div>
+
+    <div class="row align-items-center mb-2">
+      <div class="col-6">Datenbankstatus:</div>
+      <div class="col-6 text-end">
+        <span class="badge bg-success">Gesund</span>
+      </div>
+    </div>
+
+    <div class="row align-items-center mb-2">
+      <div class="col-6">Letzte Synchronisierungszeit:</div>
+      <div class="col-6 text-end">
+        <span class="text-muted">{{ lastSyncTime | date: 'short' }}</span>
+      </div>
+    </div>
+
+    <div class="row align-items-center">
+      <div class="col-6">Fehlgeschlagene Klemmwarnungen:</div>
+      <div class="col-6 text-end">
+        <span class="badge bg-danger">{{ failedClampingsCount }}</span>
+      </div>
+    </div>
+  </div>
+</div>

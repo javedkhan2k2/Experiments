@@ -1,0 +1,28 @@
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <strong>Aktuelle Protokolle </strong>
+    <a routerLink="/eventlogs" class="btn btn-sm btn-primary"
+      >Alle anzeigen</a
+    >
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-sm mb-0">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">Veranstaltungstyp</th>
+          <th scope="col">Nachricht</th>
+          <th scope="col">Zeitstempel</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (eventlog of eventLogs; track eventlog.id;) {
+        <tr>
+          <td>{{ eventlog.eventType }}</td>
+          <td>{{ eventlog.message }}</td>
+          <td>{{ eventlog.timestamp | date : "short" }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

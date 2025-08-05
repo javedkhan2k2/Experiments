@@ -1,4 +1,5 @@
-﻿using ClampingDevice.Entities;
+﻿using ClampingDevice.DTOs;
+using ClampingDevice.Entities;
 
 namespace ClampingDevice.Data;
 
@@ -12,5 +13,8 @@ public interface IClampingDataRepository
 
     Task<ClampingData?> GetLatestByDeviceIdAsync(int deviceId);
     Task<bool> SaveChangesAsync();
+
+    Task<ClampingStatsDto> GetClampingStatsAsync();
+    Task<int> GetFailedClampingsLast24hAsync();
 
 }

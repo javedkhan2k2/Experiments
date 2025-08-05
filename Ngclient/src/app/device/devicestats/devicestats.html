@@ -1,0 +1,52 @@
+@if(deviceStats){
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <strong>Gerätestatistiken</strong>
+  </div>
+  <div class="row g-3">
+    <div class="col-md-6 col-lg-6">
+      <div class="card shadow-sm border-0 text-white bg-primary">
+        <div class="card-body">
+          <h5 class="card-title">Gesamtzahl der Geräte</h5>
+          <p class="card-text display-6">
+            {{ deviceStats.totalDevices }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-6">
+      <div class="card shadow-sm border-0 text-white bg-success">
+        <div class="card-body">
+          <h5 class="card-title">Aktiv</h5>
+          <p class="card-text display-6">
+            {{ deviceStats.activeDevices }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-6">
+      <div class="card shadow-sm border-0 bg-secondary text-white">
+        <div class="card-body">
+          <h5 class="card-title">Inaktiv</h5>
+          <p class="card-text">
+            {{ deviceStats.inactiveDevices }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-6">
+      <div class="card shadow-sm border-0 text-white bg-danger">
+        <div class="card-body">
+          <h5 class="card-title">Einzigartige Modelle</h5>
+          <p class="card-text display-6">
+            {{ deviceStats.uniqueModels }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+}

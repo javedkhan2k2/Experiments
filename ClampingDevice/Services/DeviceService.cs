@@ -3,6 +3,7 @@ using ClampingDevice.Common.Results;
 using ClampingDevice.Data;
 using ClampingDevice.DTOs;
 using ClampingDevice.Entities;
+using ClampingDevice.Helpers;
 
 namespace ClampingDevice.Services;
 
@@ -24,14 +25,14 @@ public class DeviceService(IDeviceRepository deviceRepository, ILogger<DeviceSer
         }, nameof(DeleteAsync));
     }
 
-    public async Task<Result<IEnumerable<DeviceDto>>> GetAllAsync()
+    public async Task<Result<PagedList<DeviceDto>>> GetAllAsync(DeviceParams deviceParams)
     {
         return await TryExecuteAsync(async () =>
         {
-            var devices = await deviceRepository.GetAllDevicesAsync();
-            if (devices is null || !devices.Any()) return Result.Success(Enumerable.Empty<DeviceDto>());
+            var devices = await deviceRepository.GetAllDevicesAsync(deviceParams);
+            if (devices is null || !devices.Any()) return Result.Success(new PagedList<DeviceDto>(Enumerable.Empty<DeviceDto>(), 0, deviceParams.PageNumber, deviceParams.PageSize));
 
-            return Result.Success(mapper.Map<IEnumerable<DeviceDto>>(devices));
+            return Result.Success(devices);
 
         }, nameof(GetAllAsync));
     }
@@ -48,6 +49,25 @@ public class DeviceService(IDeviceRepository deviceRepository, ILogger<DeviceSer
 
             return Result.Success(mapper.Map<DeviceDto>(device));
         }, nameof(GetBySerialNumberAsync));
+    }
+
+    public async Task<Result<IEnumerable<DeviceDto>>> GetLastFiveAsync()
+    {
+        return await TryExecuteAsync(async () =>
+        {
+            var devices = await deviceRepository.GetLastFiveAsync();
+            if (devices is null || !devices.Any()) return Result.Success(Enumerable.Empty<DeviceDto>());
+            return Result.Success(mapper.Map<IEnumerable<DeviceDto>>(devices));
+        }, nameof(GetLastFiveAsync));
+    }
+
+    public async Task<Result<DeviceStatsDto>> GetStatsAsync()
+    {
+        return await TryExecuteAsync(async () =>
+        {
+            var stats = await deviceRepository.GetStatsAsync();
+            return Result.Success(stats);
+        }, nameof(GetStatsAsync));
     }
 
     public async Task<Result<DeviceStatusDto>> GetStatusAsync(string serialNumber)

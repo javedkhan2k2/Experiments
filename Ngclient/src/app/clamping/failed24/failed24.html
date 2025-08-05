@@ -1,0 +1,25 @@
+<div
+  class="card shadow-sm border-start border-4"
+  [ngClass]="failedClampings > 0 ? 'border-danger' : 'border-success'"
+
+>
+  <div class="card-body d-flex align-items-center" style="max-height: 300px; min-height: 340px;">
+    <i class="fa fa-2x me-3"
+   [ngClass]="failedClampings > 0 ? 'fa-exclamation-circle text-danger' : 'fa-check-circle text-success'">
+</i>
+    <div>
+      <h5 class="card-title mb-1">Fehlgeschlagene Klemmvorgänge</h5>
+      <p class="mb-0 text-muted">
+        @if(failedClampings > 0){
+        <div>
+          🔴 {{ failedClampings }} Ausfälle in den letzten 24 Stunden
+        </div>
+        }@else {
+        <div>
+          ✅ Keine fehlgeschlagenen Klemmvorgänge in den letzten 24 Stunden
+        </div>
+        }
+      </p>
+    </div>
+  </div>
+</div>

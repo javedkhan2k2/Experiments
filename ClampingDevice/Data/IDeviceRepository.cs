@@ -1,4 +1,6 @@
-﻿using ClampingDevice.Entities;
+﻿using ClampingDevice.DTOs;
+using ClampingDevice.Entities;
+using ClampingDevice.Helpers;
 
 namespace ClampingDevice.Data;
 
@@ -9,7 +11,9 @@ public interface IDeviceRepository
     Task AddAsync(Device device);
     void Update(Device device);
     void Delete(Device device);
-    Task<List<Device>> GetAllDevicesAsync();
+    Task<PagedList<DeviceDto>> GetAllDevicesAsync(DeviceParams deviceParams);
     Task<bool> SaveChangesAsync();
-
+    Task<DeviceStatsDto> GetStatsAsync();
+    Task<IEnumerable<Device>> GetLastFiveAsync();
+    Task<Device> GetRandomDeviceAsync();
 }

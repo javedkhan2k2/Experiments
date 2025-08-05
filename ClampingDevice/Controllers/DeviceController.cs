@@ -1,5 +1,7 @@
 ﻿using ClampingDevice.Common.Results;
 using ClampingDevice.DTOs;
+using ClampingDevice.Extensions;
+using ClampingDevice.Helpers;
 using ClampingDevice.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,11 +13,33 @@ public class DeviceController(IDeviceService deviceService) : ControllerBase
 {
     // region for all get methods
     [HttpGet]
+    [ProducesResponseType(typeof(PagedList<DeviceDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<PagedList<DeviceDto>>> GetAllDevicesAsync([FromQuery] DeviceParams deviceParams)
+    {
+        var result = await deviceService.GetAllAsync(deviceParams);
+        if (result.IsFailure) return BadRequest(result.Error);
+
+        Response.AddPaginationHeader(result.Value!);
+
+        return Ok(result.Value);
+    }
+
+    [HttpGet("last-five")]
     [ProducesResponseType(typeof(IEnumerable<DeviceDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<IEnumerable<DeviceDto>>> GetAllDevicesAsync()
+    public async Task<ActionResult<IEnumerable<DeviceDto>>> GetLastFiveAsync()
     {
-        var result = await deviceService.GetAllAsync();
+        var result = await deviceService.GetLastFiveAsync();
+        if (result.IsFailure) return BadRequest(result.Error);
+
+        return Ok(result.Value);
+    }
+
+    [HttpGet("stats")]
+    public async Task<ActionResult<DeviceStatsDto>> GetDevicesStats()
+    {
+        var result = await deviceService.GetStatsAsync();
         if (result.IsFailure) return BadRequest(result.Error);
 
         return Ok(result.Value);

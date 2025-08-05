@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ClampingDevice.Data;
+using System.ComponentModel.DataAnnotations;
 
 namespace ClampingDevice.DTOs;
 
@@ -10,4 +11,5 @@ public class UpdateClampingDataDto
     public double ClampingForceN { get; set; }
     [Required]
     public double TemperatureC { get; set; }
+    public ClampingActionType ActionType { get; set; }
 }

@@ -15,7 +15,25 @@ namespace ClampingDevice.Controllers
         public async Task<ActionResult<IEnumerable<ClampingDataDto>>> GetAllAsync()
         {
             var result = await clampingDataService.GetAllAsync();
-            if(result.IsFailure) return BadRequest(result.Error);
+            if (result.IsFailure) return BadRequest(result.Error);
+            return Ok(result.Value);
+        }
+
+        [HttpGet("stats")]
+        public async Task<ActionResult<ClampingStatsDto>> GetDevicesStats()
+        {
+            var result = await clampingDataService.GetStatsAsync();
+            if (result.IsFailure) return BadRequest(result.Error);
+
+            return Ok(result.Value);
+        }
+
+        [HttpGet("failed")]
+        public async Task<ActionResult<int>> GetFailedClampingsLast24hAsync()
+        {
+            var result = await clampingDataService.GetFailedClampingsLast24hAsync();
+            if (result.IsFailure) return BadRequest(result.Error);
+
             return Ok(result.Value);
         }
 
@@ -25,7 +43,7 @@ namespace ClampingDevice.Controllers
         [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ClampingDataDto>> GetClampingDataByIdAsync(int id)
         {
-            if(id < 1) return BadRequest(new Error("InvalidId", "The provided ID is invalid."));
+            if (id < 1) return BadRequest(new Error("InvalidId", "The provided ID is invalid."));
 
             var result = await clampingDataService.GetByIdAsync(id);
             if (result.IsFailure)
@@ -47,9 +65,9 @@ namespace ClampingDevice.Controllers
 
             var result = await clampingDataService.CreateAsync(dto);
             if (result.IsFailure) return BadRequest(result.Error);
-            
+
             var value = result.Value!;
-            return CreatedAtRoute("GetClampingDataByIdAsync", new {id = value.Id}, value);
+            return CreatedAtRoute("GetClampingDataByIdAsync", new { id = value.Id }, value);
         }
 
         [HttpDelete("{id:int}")]

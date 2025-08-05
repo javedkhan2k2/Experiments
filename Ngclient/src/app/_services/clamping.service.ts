@@ -5,6 +5,7 @@ import { UpdateClampingDataDto } from '../_models/updateClampingDataDto';
 import { ClampingDataDto } from '../_models/clampingDataDto';
 import { Observable } from 'rxjs';
 import { CreateClampingDataDto } from '../_models/createClampingDataDto';
+import { ClampingStatsDto } from '../_models/clampingStatsDto';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +16,14 @@ export class ClampingService {
 
   getAllClampingData(): Observable<ClampingDataDto[]> {
     return this.http.get<ClampingDataDto[]>(`${this.baseUrl}clamping`);
+  }
+
+  getClampingStats() {
+    return this.http.get<ClampingStatsDto>(`${this.baseUrl}clamping/stats`)
+  }
+
+  getFailedClampings() {
+    return this.http.get<number>(`${this.baseUrl}clamping/failed`)
   }
 
   getClampingDataById(id: number): Observable<ClampingDataDto>{

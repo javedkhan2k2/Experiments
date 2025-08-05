@@ -1,5 +1,6 @@
 ﻿using ClampingDevice.Data;
 using ClampingDevice.Services;
+using ClampingDevice.Workers;
 using Microsoft.EntityFrameworkCore;
 
 namespace ClampingDevice.Extensions;
@@ -15,6 +16,8 @@ public static class ApplicationServiceExtensions
         services.AddOpenApi();
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         services.AddCors();
+        services.AddHostedService<ClampingSimulator>();
+        services.AddSignalR();
 
         // Register Repositories and Services
         services.AddScoped<IDeviceRepository, DeviceRepository>();

@@ -1,5 +1,7 @@
 ﻿using ClampingDevice.Common.Results;
 using ClampingDevice.DTOs;
+using ClampingDevice.Extensions;
+using ClampingDevice.Helpers;
 using ClampingDevice.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,12 +12,26 @@ namespace ClampingDevice.Controllers;
 public class EventLogController(IEventLogService eventLogService) : ControllerBase
 {
     [HttpGet]
+    [ProducesResponseType(typeof(PagedList<EventLogDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<PagedList<EventLogDto>>> GetAllAsync([FromQuery] EventLogParams eventLogParams)
+    {
+        var result = await eventLogService.GetAllAsync(eventLogParams);
+        if (result.IsFailure) return BadRequest(result.Error);
+
+        Response.AddPaginationHeader(result.Value!);
+
+        return Ok(result.Value);
+    }
+
+    [HttpGet("last-five")]
     [ProducesResponseType(typeof(IEnumerable<EventLogDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<IEnumerable<EventLogDto>>> GetAllAsync()
+    public async Task<ActionResult<IEnumerable<EventLogDto>>> GetLastFiveAsync()
     {
-        var result = await eventLogService.GetAllAsync();
-        if(result.IsFailure) return BadRequest(result.Error);
+        var result = await eventLogService.GetLastFiveAsync();
+        if (result.IsFailure) return BadRequest(result.Error);
+
         return Ok(result.Value);
     }
 
@@ -46,8 +62,8 @@ public class EventLogController(IEventLogService eventLogService) : ControllerBa
             return BadRequest(ModelState);
         var result = await eventLogService.CreateAsync(dto);
         if (result.IsFailure) return BadRequest(result.Error);
-        
+
         var value = result.Value!;
-        return CreatedAtRoute("GetByIdAsync", new { id = value.Id}, value);
+        return CreatedAtRoute("GetByIdAsync", new { id = value.Id }, value);
     }
 }

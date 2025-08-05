@@ -1,0 +1,50 @@
+@if(eventLogService.paginatedResult()?.items?.length){
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-left">
+    <strong>Aktuelle Protokolle <span class="text-success">({{ eventLogService.paginatedResult()?.items?.length }})</span></strong>
+    <a routerLink="/" class="btn btn-sm btn-primary">Zurück</a>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-sm mb-0">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">Veranstaltungstyp</th>
+          <th scope="col">Nachricht</th>
+          <th scope="col">Zeitstempel</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (eventlog of eventLogService.paginatedResult()?.items; track
+        eventlog.id;) {
+        <tr>
+          <td>{{ eventlog.eventType }}</td>
+          <td>{{ eventlog.message }}</td>
+          <td>{{ eventlog.timestamp | date : "short" }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (eventLogService.paginatedResult()?.pagination) {
+  <div class="d-flex justify-content-center mt-4">
+    <pagination
+      [boundaryLinks]="true"
+      [totalItems]="(eventLogService.paginatedResult()?.pagination)!.totalItems"
+      [itemsPerPage]="
+        (eventLogService.paginatedResult()?.pagination)!.itemsPerPage
+      "
+      (pageChanged)="pageChanged($event)"
+      [(ngModel)]="(eventLogService.paginatedResult()?.pagination)!.currentPage"
+      [maxSize]="10"
+      previousText="&lsaquo;"
+      nextText="&rsaquo;"
+      firstText="&laquo;"
+      lastText="&raquo;"
+      class="pagination-sm"
+    >
+    </pagination>
+  </div>
+  }
+</div>
+
+}

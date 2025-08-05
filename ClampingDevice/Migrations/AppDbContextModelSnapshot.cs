@@ -23,6 +23,9 @@ namespace ClampingDevice.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("ActionType")
+                        .HasColumnType("INTEGER");
+
                     b.Property<double>("ClampingForceN")
                         .HasColumnType("REAL");
 
