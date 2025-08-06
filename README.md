@@ -28,7 +28,13 @@ Ziel war es, eine moderne, wartbare und erweiterbare Dashboard-Anwendung zu baue
 
 ## 📸 Dashboard-Vorschau
 
-![Dashboard Screenshot](screenshot.png) <!-- Optional, Screenshot hinzufügen -->
+### DashBoard
+
+![Dashboard Screenshot](images/dashboard.png)
+
+### Aktuelle Protokolle
+
+![Protokolle](images/protokolle.png)
 
 ---
 
@@ -47,7 +53,7 @@ Ziel war es, eine moderne, wartbare und erweiterbare Dashboard-Anwendung zu baue
 
 ### Voraussetzungen
 
-- .NET 8 SDK
+- .NET 9 SDK
 - Node.js + Angular CLI
 - SQL Server (lokal oder Azure)
 
