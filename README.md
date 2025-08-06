@@ -19,8 +19,8 @@ Ziel war es, eine moderne, wartbare und erweiterbare Dashboard-Anwendung zu baue
 
 ## 🛠️ Technologien
 
-- **Backend**: ASP.NET Core 8, Entity Framework Core, Repository Pattern, AutoMapper
-- **Frontend**: Angular 17, Bootstrap 5, Font Awesome
+- **Backend**: ASP.NET Core 9, Entity Framework Core, Sqlite, Repository Pattern, AutoMapper
+- **Frontend**: Angular 20, Bootstrap 5, Font Awesome
 - **Live Feed**: SignalR (WebSocket-Kommunikation)
 - **Sonstiges**: Bogus/Faker zum Erzeugen von Seed-Daten, Clean Architecture, DTOs
 
@@ -55,7 +55,7 @@ Ziel war es, eine moderne, wartbare und erweiterbare Dashboard-Anwendung zu baue
 
 - .NET 9 SDK
 - Node.js + Angular CLI
-- SQL Server (lokal oder Azure)
+- Sqlite
 
 ### Schritte
 
